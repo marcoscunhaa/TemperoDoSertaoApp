@@ -4,6 +4,7 @@ import { Estoque } from "../estoque/estoque";
 import { ModalVender } from "../modal-vender/modal-vender";
 import { ModalInserir } from "../modal-inserir/modal-inserir";
 import { Vendas } from "../vendas/vendas";
+import { Location } from '@angular/common';
 
 @Component({
   standalone: true,
@@ -13,5 +14,9 @@ import { Vendas } from "../vendas/vendas";
   imports: [Footer, Estoque, ModalVender, ModalInserir, Vendas],
 })
 export class Home {
+
+  constructor(private location: Location) {
+    this.location.go('/home');
+   }
 
 }

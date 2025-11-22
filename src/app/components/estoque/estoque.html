@@ -56,8 +56,7 @@
 
           <div class="mb-3">
             <label for="precoVendaEditar" class="form-label fw-semibold">Valor de venda (R$)</label>
-            <input type="number" id="precoVendaEditar" class="form-control"
-              [ngModel]="produtoSelecionado?.precoVenda"
+            <input type="number" id="precoVendaEditar" class="form-control" [ngModel]="produtoSelecionado?.precoVenda"
               (ngModelChange)="produtoSelecionado && (produtoSelecionado.precoVenda = $event)" name="precoVenda"
               step="0.01" />
           </div>
@@ -121,7 +120,13 @@
 
 <!-- Header + Ações -->
 <div class="d-flex justify-content-between align-items-center mb-4">
-  <div class="flex-grow-1 text-center">
+
+  <!-- Logo + Título centralizados -->
+  <div class="d-flex align-items-center justify-content-center flex-grow-1">
+    <!-- Logo rotacionada 90º -->
+    <img src="https://i.ibb.co/tPZ0W5pC/logo.png" alt="logo"
+      style="height:50px; margin-right:10px;">
+
     <h2 class="m-0 fw-bold">TEMPERO DO SERTÃO</h2>
   </div>
 
