@@ -15,8 +15,4 @@ import { Location } from '@angular/common';
 })
 export class Home {
 
-  constructor(private location: Location) {
-    this.location.go('/home');
-   }
-
 }

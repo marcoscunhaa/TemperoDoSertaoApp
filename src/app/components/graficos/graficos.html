@@ -1,0 +1,33 @@
+<div class="position-relative mb-3">
+
+  <!-- Botão X no canto superior direito -->
+  <button type="button"
+          class="btn btn-outline-danger rounded-circle fw-bold shadow-sm position-absolute"
+          style="top: 0; right: 0; width: 38px; height: 38px; display: flex; justify-content: center; align-items: center;"
+          data-bs-toggle="modal" data-bs-target="#modalGraficos">
+    X
+  </button>
+
+  <!-- Título + Ícone + Filtro centralizado -->
+  <div class="d-flex justify-content-center align-items-center gap-3">
+
+    <!-- Ícone de gráfico -->
+    <i class="bi bi-bar-chart-line fs-3 text-warning"></i>
+
+    <!-- Título -->
+    <h4 class="fw-bold m-0">FATURAMENTO MENSAL</h4>
+
+    <!-- Filtro -->
+    <select class="form-select w-auto shadow-sm fw-semibold"
+            [(ngModel)]="anoSelecionado"
+            (change)="atualizarGrafico()">
+      @for (ano of anos; track ano) {
+        <option [ngValue]="ano">{{ ano }}</option>
+      }
+    </select>
+
+  </div>
+
+</div>
+
+<canvas id="graficoVendas"></canvas>

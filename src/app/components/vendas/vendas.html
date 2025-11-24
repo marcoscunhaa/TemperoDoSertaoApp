@@ -3,9 +3,27 @@
 
   <!-- Cabeçalho -->
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="m-0 fw-bold text-success">
-      <i class="bi bi-bar-chart-line me-2"></i>Resumo de Vendas
-    </h3>
+    <!-- Título + Botão lado a lado -->
+    <div class="d-flex align-items-center gap-3">
+      <h3 class="m-0 fw-bold text-success d-flex align-items-center">
+        <i class="bi bi-bar-chart-line me-2"></i>
+        Resumo de Vendas
+      </h3>
+
+      <button class="btn btn-outline-success fw-semibold px-4 py-2 rounded-3 shadow-sm d-flex align-items-center gap-2"
+        data-bs-toggle="modal" data-bs-target="#modalGraficos">
+        <i class="bi bi-graph-up-arrow fs-5"></i>
+        Ver Gráficos
+      </button>
+    </div>
+
+    <div class="modal fade" id="modalGraficos" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content p-3">
+          <app-graficos></app-graficos>
+        </div>
+      </div>
+    </div>
 
     <span class="badge bg-success fs-6 px-3 py-2 shadow-sm">
       Atualizado: {{ dataAtualizacao }}
@@ -38,6 +56,7 @@
         <div class="fs-5 fw-bold text-warning">{{ resumo.margemLucro | number:'1.1-2' }}%</div>
       </div>
     </div>
+
   </div>
 
   <!-- Tabela de Vendas -->
@@ -52,28 +71,28 @@
       <div class="d-flex gap-2 flex-wrap">
 
         <!-- Categoria -->
-        <select class="form-select w-auto bg-light border-0 shadow-sm fw-semibold"
-          [(ngModel)]="categoriaSelecionada" (change)="filtrarVendas()">
+        <select class="form-select w-auto bg-light border-0 shadow-sm fw-semibold" [(ngModel)]="categoriaSelecionada"
+          (change)="filtrarVendas()">
           @for (cat of categorias; track $index) {
-            <option [ngValue]="cat">{{ cat | titlecase }}</option>
+          <option [ngValue]="cat">{{ cat | titlecase }}</option>
           }
         </select>
 
         <!-- Mês -->
-        <select class="form-select w-auto bg-light border-0 shadow-sm fw-semibold"
-          [(ngModel)]="mesSelecionado" (change)="filtrarVendas()">
+        <select class="form-select w-auto bg-light border-0 shadow-sm fw-semibold" [(ngModel)]="mesSelecionado"
+          (change)="filtrarVendas()">
           <option [ngValue]="'todos'">Todos Meses</option>
           @for (m of meses; track $index) {
-            <option [ngValue]="m.valor">{{ m.nome }}</option>
+          <option [ngValue]="m.valor">{{ m.nome }}</option>
           }
         </select>
 
         <!-- Ano -->
-        <select class="form-select w-auto bg-light border-0 shadow-sm fw-semibold"
-          [(ngModel)]="anoSelecionado" (change)="filtrarVendas()">
+        <select class="form-select w-auto bg-light border-0 shadow-sm fw-semibold" [(ngModel)]="anoSelecionado"
+          (change)="filtrarVendas()">
           <option [ngValue]="'todos'">Todos Anos</option>
           @for (ano of anos; track $index) {
-            <option [ngValue]="ano">{{ ano }}</option>
+          <option [ngValue]="ano">{{ ano }}</option>
           }
         </select>
 
@@ -101,20 +120,20 @@
 
         <tbody>
           @for (venda of vendasFiltradas; track venda.id) {
-            <tr>
-              <td>{{ venda.dataVenda | date:'dd/MM/yyyy' }}</td>
-              <td>{{ venda.categoria | titlecase }}</td>
-              <td>{{ venda.produto }}</td>
-              <td>{{ venda.marca }}</td>
-              <td>{{ formatarMoeda(venda.precoVenda) }}</td>
-              <td>{{ venda.quantidadeVendida }}</td>
-              <td>{{ venda.formaPagamento }}</td>
-              <td class="text-success fw-bold">{{ formatarLucro(venda) }}</td>
-            </tr>
+          <tr>
+            <td>{{ venda.dataVenda | date:'dd/MM/yyyy' }}</td>
+            <td>{{ venda.categoria | titlecase }}</td>
+            <td>{{ venda.produto }}</td>
+            <td>{{ venda.marca }}</td>
+            <td>{{ formatarMoeda(venda.precoVenda) }}</td>
+            <td>{{ venda.quantidadeVendida }}</td>
+            <td>{{ venda.formaPagamento }}</td>
+            <td class="text-success fw-bold">{{ formatarLucro(venda) }}</td>
+          </tr>
           } @empty {
-            <tr>
-              <td colspan="8" class="py-4 text-muted">Nenhuma venda encontrada.</td>
-            </tr>
+          <tr>
+            <td colspan="8" class="py-4 text-muted">Nenhuma venda encontrada.</td>
+          </tr>
           }
         </tbody>
       </table>

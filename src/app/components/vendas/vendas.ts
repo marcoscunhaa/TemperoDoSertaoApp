@@ -3,11 +3,12 @@ import { Venda, ResumoVendasDTO, VendaService } from '../../services/venda';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NotificacaoService, Notificacao } from '../../services/notificacao';
+import { GraficosComponent } from '../graficos/graficos';
 
 @Component({
   selector: 'app-vendas',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, GraficosComponent],
   templateUrl: './vendas.html',
   styleUrls: ['./vendas.scss'],
 })
