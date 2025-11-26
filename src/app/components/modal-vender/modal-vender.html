@@ -15,8 +15,10 @@
       <div class="modal-body p-4" [formGroup]="formVenda">
 
         <!-- PESQUISA -->
-        <input type="text" class="form-control mb-4 shadow-sm rounded-3" placeholder="Pesquisar produtos..."
-          (input)="filtrar($event)">
+        <input type="text"
+               class="form-control mb-4 shadow-sm rounded-3"
+               placeholder="Pesquisar produtos..."
+               (input)="filtrar($event)">
 
         <!-- TABELA -->
         <div class="table-responsive shadow-sm rounded-4 border">
@@ -32,45 +34,67 @@
             </thead>
 
             <tbody>
-              <tr *ngFor="let p of produtosFiltrados; let i = index" [formGroup]="produtosFormArray.controls[i]">
+              <tr *ngFor="let p of produtosFiltrados"
+                  [formGroup]="getFormGroupById(p.id!)">
+
                 <td class="text-center">
-                  <input type="checkbox" formControlName="selecionado" (change)="atualizarTotal()">
+                  <input type="checkbox"
+                         formControlName="selecionado"
+                         (change)="atualizarTotal()">
                 </td>
 
                 <td class="fw-semibold">{{ p.detalhe }}</td>
                 <td>{{ p.marca }}</td>
-                <td class="fw-bold text-success">R$ {{ p.precoVenda | number:'1.2-2' }}</td>
+                <td class="fw-bold text-success">
+                  R$ {{ p.precoVenda | number:'1.2-2' }}
+                </td>
 
                 <td class="text-center">
 
                   <!-- QUANTIDADE -->
-                  <input type="number" class="form-control form-control-sm w-75 mx-auto mb-1"
-                    formControlName="quantidadeVenda" min="1" (input)="atualizarTotal()" [disabled]="!produtosFormArray.controls[i].value.selecionado
-                 || produtosFormArray.controls[i].value.vendaPorPeso">
+                  <input type="number"
+                         class="form-control form-control-sm w-75 mx-auto mb-1"
+                         formControlName="quantidadeVenda"
+                         min="1"
+                         (input)="atualizarTotal()"
+                         [disabled]="!getFormGroupById(p.id!).value.selecionado
+                                   || getFormGroupById(p.id!).value.vendaPorPeso">
 
                   <!-- Checkbox PESO -->
                   <div class="form-check d-flex justify-content-center align-items-center gap-2">
-                    <input type="checkbox" class="form-check-input" formControlName="vendaPorPeso"
-                      (change)="atualizarTotal()" [disabled]="!produtosFormArray.controls[i].value.selecionado">
+                    <input type="checkbox"
+                           class="form-check-input"
+                           formControlName="vendaPorPeso"
+                           (change)="atualizarTotal()"
+                           [disabled]="!getFormGroupById(p.id!).value.selecionado">
+
                     <label class="form-check-label fw-semibold small">Peso?</label>
                   </div>
 
                   <!-- Valor peso -->
-                  <input *ngIf="produtosFormArray.controls[i].value.vendaPorPeso" type="number"
-                    class="form-control form-control-sm w-75 mx-auto mt-1" placeholder="Valor R$"
-                    formControlName="valorPeso" min="0.01" step="0.01" (input)="atualizarTotal()"
-                    [disabled]="!produtosFormArray.controls[i].value.selecionado">
+                  <input *ngIf="getFormGroupById(p.id!).value.vendaPorPeso"
+                         type="number"
+                         class="form-control form-control-sm w-75 mx-auto mt-1"
+                         placeholder="Valor R$"
+                         formControlName="valorPeso"
+                         min="0.01"
+                         step="0.01"
+                         (input)="atualizarTotal()"
+                         [disabled]="!getFormGroupById(p.id!).value.selecionado">
+
                 </td>
+
               </tr>
+
             </tbody>
           </table>
         </div>
 
-
         <!-- FORMA DE PAGAMENTO -->
         <div class="mt-4">
           <label class="fw-bold mb-1">Forma de Pagamento</label>
-          <select class="form-select shadow-sm" formControlName="formaPagamento">
+          <select class="form-select shadow-sm"
+                  formControlName="formaPagamento">
             <option value="dinheiro">Dinheiro</option>
             <option value="pix">Pix</option>
             <option value="debito">Cartão de Débito</option>
@@ -79,15 +103,25 @@
         </div>
 
         <!-- CHECKBOX TROCO -->
-        <div *ngIf="formaPagamento === 'dinheiro'" class="form-check mt-3">
-          <input type="checkbox" class="form-check-input" formControlName="precisaTroco" (change)="calcularTroco()">
+        <div *ngIf="formaPagamento === 'dinheiro'"
+             class="form-check mt-3">
+          <input type="checkbox"
+                 class="form-check-input"
+                 formControlName="precisaTroco"
+                 (change)="calcularTroco()">
           <label class="form-check-label fw-semibold">Precisa de troco?</label>
         </div>
 
         <!-- VALOR RECEBIDO -->
-        <div *ngIf="formaPagamento === 'dinheiro' && precisaTroco" class="mt-2">
-          <input type="number" class="form-control shadow-sm" formControlName="valorRecebido" (input)="calcularTroco()"
-            min="0" step="0.01" placeholder="Valor recebido (R$)">
+        <div *ngIf="formaPagamento === 'dinheiro' && precisaTroco"
+             class="mt-2">
+          <input type="number"
+                 class="form-control shadow-sm"
+                 formControlName="valorRecebido"
+                 (input)="calcularTroco()"
+                 min="0"
+                 step="0.01"
+                 placeholder="Valor recebido (R$)">
         </div>
 
         <!-- CARDS DE TOTAIS -->
@@ -96,21 +130,28 @@
           <div class="col-md-4">
             <div class="p-3 rounded-4 bg-info bg-opacity-25 shadow-sm">
               <div class="fw-bold">Total:</div>
-              <div class="fs-4 fw-bold">R$ {{ total | number:'1.2-2' }}</div>
+              <div class="fs-4 fw-bold">
+                R$ {{ total | number:'1.2-2' }}
+              </div>
             </div>
           </div>
 
           <div class="col-md-4">
             <div class="p-3 rounded-4 bg-success bg-opacity-25 shadow-sm">
               <div class="fw-bold">Lucro:</div>
-              <div class="fs-4 fw-bold text-success">R$ {{ lucro | number:'1.2-2' }}</div>
+              <div class="fs-4 fw-bold text-success">
+                R$ {{ lucro | number:'1.2-2' }}
+              </div>
             </div>
           </div>
 
-          <div *ngIf="formaPagamento === 'dinheiro' && precisaTroco" class="col-md-4">
+          <div *ngIf="formaPagamento === 'dinheiro' && precisaTroco"
+               class="col-md-4">
             <div class="p-3 rounded-4 bg-warning bg-opacity-25 shadow-sm">
               <div class="fw-bold">Troco:</div>
-              <div class="fs-4 fw-bold text-warning">R$ {{ troco | number:'1.2-2' }}</div>
+              <div class="fs-4 fw-bold text-warning">
+                R$ {{ troco | number:'1.2-2' }}
+              </div>
             </div>
           </div>
 
@@ -121,7 +162,10 @@
       <!-- Rodapé -->
       <div class="modal-footer p-3">
         <button class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
-        <button class="btn btn-success px-4" data-bs-dismiss="modal" (click)="finalizarVenda()">
+
+        <button class="btn btn-success px-4"
+                data-bs-dismiss="modal"
+                (click)="finalizarVenda()">
           <i class="bi bi-check-circle me-1"></i>
           Finalizar Venda
         </button>

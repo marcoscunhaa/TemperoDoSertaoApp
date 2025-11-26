@@ -20,8 +20,8 @@ export class ModalVender {
 
   total = 0;
   lucro = 0;
-  loading = false;
   troco = 0;
+  loading = false;
 
   formVenda!: FormGroup;
 
@@ -30,7 +30,7 @@ export class ModalVender {
     private vendaService: VendaService,
     private notificacaoService: NotificacaoService,
     private fb: FormBuilder
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.formVenda = this.fb.group({
@@ -42,12 +42,12 @@ export class ModalVender {
 
     this.carregarProdutos();
 
-    // Atualiza troco e lucro sempre que necessário
     this.formVenda.get('valorRecebido')?.valueChanges.subscribe(() => this.calcularTroco());
     this.formVenda.get('precisaTroco')?.valueChanges.subscribe(() => this.calcularTroco());
     this.formVenda.get('formaPagamento')?.valueChanges.subscribe(() => this.calcularTroco());
   }
 
+  // -- GETTERS ---
   get produtosFormArray(): FormArray<FormGroup> {
     return this.formVenda.get('produtos') as FormArray<FormGroup>;
   }
@@ -64,6 +64,11 @@ export class ModalVender {
     return this.formVenda.get('valorRecebido')?.value;
   }
 
+  // 🔥 CORREÇÃO FUNDAMENTAL
+  getFormGroupById(id: number | undefined): FormGroup {
+    return this.produtosFormArray.controls.find((c) => c.value.id === id)!;
+  }
+
   carregarProdutos() {
     this.loading = true;
 
@@ -73,7 +78,7 @@ export class ModalVender {
         this.produtosFiltrados = [...lista];
         this.produtosFormArray.clear();
 
-        lista.forEach(p => {
+        lista.forEach((p) => {
           this.produtosFormArray.push(
             this.fb.group({
               id: [p.id],
@@ -83,6 +88,7 @@ export class ModalVender {
               precoCompra: [p.precoCompra],
               precoVenda: [p.precoVenda],
               quantidadeEstoque: [p.quantidadeEstoque],
+
               selecionado: [false],
               vendaPorPeso: [false],
               valorPeso: [0],
@@ -93,26 +99,25 @@ export class ModalVender {
 
         this.loading = false;
       },
-      error: () => this.loading = false,
+
+      error: () => (this.loading = false),
     });
   }
 
   filtrar(event: any) {
     const termo = event.target.value.toLowerCase().trim();
 
-    this.produtosFiltrados = this.produtos.filter(p =>
-      p.detalhe.toLowerCase().includes(termo) ||
-      p.marca.toLowerCase().includes(termo)
+    this.produtosFiltrados = this.produtos.filter(
+      (p) => p.detalhe.toLowerCase().includes(termo) || p.marca.toLowerCase().includes(termo)
     );
   }
 
-
   atualizarTotal() {
     this.total = this.produtosFormArray.controls
-      .filter(c => c.value.selecionado)
+      .filter((c) => c.value.selecionado)
       .reduce((soma, c) => {
-        const v = c.value;
-        return soma + (v.vendaPorPeso ? v.valorPeso || 0 : v.precoVenda * v.quantidadeVenda);
+        const p = c.value;
+        return soma + (p.vendaPorPeso ? p.valorPeso || 0 : p.precoVenda * p.quantidadeVenda);
       }, 0);
 
     this.lucro = this.calcularLucro();
@@ -121,14 +126,15 @@ export class ModalVender {
 
   calcularLucro(): number {
     return this.produtosFormArray.controls
-      .filter(c => c.value.selecionado)
-      .reduce((lucroTotal, c) => {
+      .filter((c) => c.value.selecionado)
+      .reduce((lucro, c) => {
         const p = c.value;
 
         const totalVenda = p.vendaPorPeso ? p.valorPeso : p.precoVenda * p.quantidadeVenda;
+
         const totalCompra = p.precoCompra * p.quantidadeVenda;
 
-        return lucroTotal + (totalVenda - totalCompra);
+        return lucro + (totalVenda - totalCompra);
       }, 0);
   }
 
@@ -137,48 +143,56 @@ export class ModalVender {
       this.troco = 0;
       return;
     }
+
     const recebido = Number(this.valorRecebido || 0);
+
     this.troco = recebido - this.total;
+
     if (this.troco < 0) this.troco = 0;
   }
 
   finalizarVenda() {
     const selecionados = this.produtosFormArray.controls
-      .filter(c => c.value.selecionado)
-      .map(c => c.value);
+      .filter((c) => c.value.selecionado)
+      .map((c) => c.value);
 
+    // --- validações ---
     if (selecionados.length === 0) {
       this.notificacaoService.emitirAviso('Selecione ao menos um produto.');
       return;
     }
 
-    const produtoSemEstoque = selecionados.find(p => p.quantidadeEstoque === 0);
-    if (produtoSemEstoque) {
-      this.notificacaoService.emitirErro(`O produto "${produtoSemEstoque.detalhe}" está sem estoque!`);
+    const semEstoque = selecionados.find((p) => p.quantidadeEstoque === 0);
+    if (semEstoque) {
+      this.notificacaoService.emitirErro(`O produto "${semEstoque.detalhe}" está sem estoque!`);
       return;
     }
 
-    // Validação para vendas por peso: valor mínimo = preço unitário * quantidade
-    const produtoComValorInsuficiente = selecionados.find(p =>
-      p.vendaPorPeso && (p.valorPeso < p.precoVenda * p.quantidadeVenda)
+    const insuficiente = selecionados.find(
+      (p) => p.vendaPorPeso && p.valorPeso < p.precoVenda * p.quantidadeVenda
     );
-    if (produtoComValorInsuficiente) {
+
+    if (insuficiente) {
       this.notificacaoService.emitirErro(
-        `O valor informado para "${produtoComValorInsuficiente.detalhe}" é menor que o mínimo permitido!`
+        `O valor informado para "${insuficiente.detalhe}" é menor que o mínimo permitido!`
       );
       return;
     }
 
-    if (this.formaPagamento === 'dinheiro' && this.precisaTroco && this.valorRecebido < this.total) {
+    if (
+      this.formaPagamento === 'dinheiro' &&
+      this.precisaTroco &&
+      this.valorRecebido < this.total
+    ) {
       this.notificacaoService.emitirErro('O valor recebido é menor que o total!');
       return;
     }
 
+    // --- salvar vendas ---
     this.loading = true;
 
-    const requests = selecionados.map(p => {
-      const precoUnitario = p.vendaPorPeso ? (p.valorPeso / p.quantidadeVenda) : p.precoVenda;
-      const quantidade = p.quantidadeVenda;
+    const requests = selecionados.map((p) => {
+      const precoUnitario = p.vendaPorPeso ? p.valorPeso / p.quantidadeVenda : p.precoVenda;
 
       const venda: Venda = {
         dataVenda: new Date().toISOString().split('T')[0],
@@ -188,19 +202,21 @@ export class ModalVender {
         precoCompra: p.precoCompra,
         precoVenda: precoUnitario,
         formaPagamento: this.formaPagamento,
-        quantidadeVendida: quantidade,
+        quantidadeVendida: p.quantidadeVenda,
       };
+
       return this.vendaService.criarVenda(venda);
     });
 
     forkJoin(requests).subscribe({
       next: () => {
         this.notificacaoService.emitirSucesso('Venda registrada com sucesso!');
+
         this.carregarProdutos();
         this.carregarVendas();
         this.atualizarTotal();
 
-        this.produtosFormArray.controls.forEach(c =>
+        this.produtosFormArray.controls.forEach((c) =>
           c.patchValue({
             selecionado: false,
             quantidadeVenda: 1,
@@ -209,19 +225,25 @@ export class ModalVender {
           })
         );
 
-        this.formVenda.patchValue({ precisaTroco: false, valorRecebido: 0 });
+        this.formVenda.patchValue({
+          precisaTroco: false,
+          valorRecebido: 0,
+        });
+
         this.troco = 0;
         this.lucro = 0;
       },
+
       error: () => this.notificacaoService.emitirErro('Venda não foi realizada!'),
+
       complete: () => (this.loading = false),
     });
   }
 
   carregarVendas() {
     this.vendaService.listarVendas().subscribe({
-      next: lista => (this.vendas = lista),
-      error: err => console.error(err),
+      next: (lista) => (this.vendas = lista),
+      error: (err) => console.error(err),
     });
   }
 }

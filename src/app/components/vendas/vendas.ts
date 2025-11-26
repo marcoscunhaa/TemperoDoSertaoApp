@@ -13,7 +13,6 @@ import { GraficosComponent } from '../graficos/graficos';
   styleUrls: ['./vendas.scss'],
 })
 export class Vendas implements OnInit {
-
   vendas: Venda[] = [];
   vendasFiltradas: Venda[] = [];
   resumo: ResumoVendasDTO = {
@@ -57,7 +56,6 @@ export class Vendas implements OnInit {
 
   ngOnInit() {
     this.setDataAtualizacao();
-
     this.anos = Array.from({ length: 11 }, (_, i) => 2025 + i);
 
     this.carregarResumo();
@@ -66,8 +64,15 @@ export class Vendas implements OnInit {
     this.notificacaoService.notificacao$.subscribe((notif: Notificacao) => {
       this.alertaMensagem = notif.mensagem;
       this.tipoAlerta = notif.tipo;
-      this.carregarVendas();
-      this.carregarResumo();
+
+      // Carrega vendas e só rola para o topo depois da lista atualizada
+      this.vendaService.listarVendas().subscribe((lista) => {
+        this.vendas = lista;
+        this.filtrarVendas();
+      });
+      this.vendaService.getResumo().subscribe((res) => {
+        this.resumo = res;
+      });
     });
   }
 
@@ -101,11 +106,9 @@ export class Vendas implements OnInit {
         this.categoriaSelecionada === 'todas' ||
         venda.categoria.toLowerCase() === this.categoriaSelecionada.toLowerCase();
 
-      const anoOk =
-        this.anoSelecionado === 'todos' || ano === this.anoSelecionado;
+      const anoOk = this.anoSelecionado === 'todos' || ano === this.anoSelecionado;
 
-      const mesOk =
-        this.mesSelecionado === 'todos' || mes === this.mesSelecionado;
+      const mesOk = this.mesSelecionado === 'todos' || mes === this.mesSelecionado;
 
       return categoriaOk && anoOk && mesOk;
     });
@@ -136,7 +139,6 @@ export class Vendas implements OnInit {
 }
 
 function parseLocalDate(dataVenda: string): { ano: number; mes: number; dia: number } {
-
   if (!dataVenda || dataVenda.trim().length < 8) {
     return { ano: 0, mes: 0, dia: 0 };
   }
@@ -153,7 +155,7 @@ function parseLocalDate(dataVenda: string): { ano: number; mes: number; dia: num
   }
 
   if (dataVenda.includes('/')) {
-    const [diaStr, mesStr, anoStr] = dataVenda.split('/').map(p => p.trim());
+    const [diaStr, mesStr, anoStr] = dataVenda.split('/').map((p) => p.trim());
     return {
       ano: Number(anoStr),
       mes: Number(mesStr) - 1,
@@ -161,7 +163,7 @@ function parseLocalDate(dataVenda: string): { ano: number; mes: number; dia: num
     };
   }
 
-  const [anoStr, mesStr, diaStr] = dataVenda.split('-').map(p => p.trim());
+  const [anoStr, mesStr, diaStr] = dataVenda.split('-').map((p) => p.trim());
   return {
     ano: Number(anoStr),
     mes: Number(mesStr) - 1,
