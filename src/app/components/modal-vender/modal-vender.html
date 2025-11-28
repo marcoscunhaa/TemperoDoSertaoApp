@@ -137,7 +137,7 @@
                     <td class="text-end" style="color: #db3b3b;">
 
                       <span *ngIf="!item.vendaPorPeso">
-                        R$ {{ item.precoVenda | number:'1.2-2' }}
+                        R$ {{ item.precoVenda * item.quantidadeVenda | number:'1.2-2' }}
                       </span>
                       <span *ngIf="item.vendaPorPeso">
                         R$ {{ item.valorPeso | number:'1.2-2' }}
