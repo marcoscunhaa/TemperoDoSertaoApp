@@ -49,26 +49,47 @@
 
                 <td class="text-center">
 
-                  <!-- QUANTIDADE -->
-                  <input type="number" class="form-control form-control-sm qty-input" formControlName="quantidadeVenda"
-                    min="1" (input)="atualizarTotal()" [disabled]="
+                  <!-- QUANTIDADE NORMAL -->
+                  <input type="number" class="form-control form-control-sm qty-input"
+                    formControlName="quantidadeVenda"
+                    min="1"
+                    (input)="atualizarTotal()"
+                    [disabled]="
                       !getFormGroupById(p.id!).value.selecionado ||
                       getFormGroupById(p.id!).value.vendaPorPeso
                     ">
 
                   <!-- Checkbox PESO -->
                   <div class="form-check d-flex justify-content-center align-items-center gap-2 mt-1">
-                    <input type="checkbox" class="form-check-input" formControlName="vendaPorPeso"
-                      (change)="atualizarTotal()" [disabled]="!getFormGroupById(p.id!).value.selecionado">
+                    <input type="checkbox" class="form-check-input"
+                      formControlName="vendaPorPeso"
+                      (change)="atualizarTotal()"
+                      [disabled]="!getFormGroupById(p.id!).value.selecionado">
                     <label class="form-check-label small text-secondary">
                       Peso?
                     </label>
                   </div>
 
-                  <!-- Valor Peso -->
-                  <input *ngIf="getFormGroupById(p.id!).value.vendaPorPeso" type="number"
-                    class="form-control form-control-sm qty-input mt-1" placeholder="Valor R$"
-                    formControlName="valorPeso" min="0.01" step="0.01" (input)="atualizarTotal()"
+                  <!-- PESO (kg) -->
+                  <input *ngIf="getFormGroupById(p.id!).value.vendaPorPeso"
+                    type="number"
+                    class="form-control form-control-sm qty-input mt-1"
+                    placeholder="Peso(kg)"
+                    formControlName="peso"
+                    min="0.01"
+                    step="0.01"
+                    (input)="atualizarTotal()"
+                    [disabled]="!getFormGroupById(p.id!).value.selecionado">
+
+                  <!-- VALOR TOTAL COBRADO -->
+                  <input *ngIf="getFormGroupById(p.id!).value.vendaPorPeso"
+                    type="number"
+                    class="form-control form-control-sm qty-input mt-1"
+                    placeholder="Valor(R$)"
+                    formControlName="valorPeso"
+                    min="0.01"
+                    step="0.01"
+                    (input)="atualizarTotal()"
                     [disabled]="!getFormGroupById(p.id!).value.selecionado">
 
                 </td>
@@ -82,8 +103,8 @@
         <!-- PAGINADOR -->
         <div class="d-flex justify-content-between align-items-center mt-3 px-2">
 
-          <button class="btn btn-outline-success btn-sm px-3 rounded-pill" (click)="paginaAnterior()"
-            [disabled]="paginaAtual === 1">
+          <button class="btn btn-outline-success btn-sm px-3 rounded-pill"
+            (click)="paginaAnterior()" [disabled]="paginaAtual === 1">
             <i class="bi bi-chevron-left"></i>
             Anterior
           </button>
@@ -92,13 +113,14 @@
             Página {{ paginaAtual }} de {{ totalPaginas }}
           </span>
 
-          <button class="btn btn-outline-success btn-sm px-3 rounded-pill" (click)="proximaPagina()"
-            [disabled]="paginaAtual === totalPaginas">
+          <button class="btn btn-outline-success btn-sm px-3 rounded-pill"
+            (click)="proximaPagina()" [disabled]="paginaAtual === totalPaginas">
             Próxima
             <i class="bi bi-chevron-right"></i>
           </button>
         </div>
 
+        <!-- SUBTOTAL -->
         <div *ngIf="itensSelecionados.length > 0" class="mt-4">
           <h5 class="fw-bold mb-3 d-flex align-items-center">
             <i class="bi bi-cart-fill me-2"></i>
@@ -131,17 +153,31 @@
                     </td>
 
                     <td class="fw-semibold">
-                      {{ item.quantidadeVenda }} un
+
+                      <!-- QTD NORMAL -->
+                      <span *ngIf="!item.vendaPorPeso">
+                        {{ item.quantidadeVenda }} un
+                      </span>
+
+                      <!-- PESO -->
+                      <span *ngIf="item.vendaPorPeso">
+                        {{ item.peso }} kg
+                      </span>
+
                     </td>
 
                     <td class="text-end" style="color: #db3b3b;">
 
+                      <!-- PREÇO NORMAL -->
                       <span *ngIf="!item.vendaPorPeso">
                         R$ {{ item.precoVenda * item.quantidadeVenda | number:'1.2-2' }}
                       </span>
+
+                      <!-- PREÇO POR PESO -->
                       <span *ngIf="item.vendaPorPeso">
                         R$ {{ item.valorPeso | number:'1.2-2' }}
                       </span>
+
                     </td>
                   </tr>
 
@@ -152,7 +188,6 @@
 
           </div>
         </div>
-
 
         <!-- FORMA DE PAGAMENTO -->
         <div class="mt-4">
@@ -167,7 +202,8 @@
 
         <!-- CHECKBOX TROCO -->
         <div *ngIf="formaPagamento === 'dinheiro'" class="form-check mt-3">
-          <input type="checkbox" class="form-check-input" formControlName="precisaTroco" (change)="calcularTroco()">
+          <input type="checkbox" class="form-check-input"
+            formControlName="precisaTroco" (change)="calcularTroco()">
           <label class="form-check-label fw-semibold">
             Precisa de troco?
           </label>
@@ -175,8 +211,11 @@
 
         <!-- VALOR RECEBIDO -->
         <div *ngIf="formaPagamento === 'dinheiro' && precisaTroco" class="mt-2">
-          <input type="number" class="form-control shadow-sm" formControlName="valorRecebido" (input)="calcularTroco()"
-            min="0" step="0.01" placeholder="Valor recebido (R$)">
+          <input type="number" class="form-control shadow-sm"
+            formControlName="valorRecebido"
+            (input)="calcularTroco()"
+            min="0" step="0.01"
+            placeholder="Valor recebido (R$)">
         </div>
 
         <!-- CARDS DE TOTAIS -->

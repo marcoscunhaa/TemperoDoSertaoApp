@@ -18,6 +18,7 @@ export class ModalVender {
   produtosFiltrados: Produto[] = [];
 
   // 🔥 paginação
+  // Paginação
   paginaAtual = 1;
   itensPorPagina = 5;
   paginaAtualProdutos: Produto[] = [];
@@ -54,7 +55,8 @@ export class ModalVender {
     this.formVenda.get('formaPagamento')?.valueChanges.subscribe(() => this.calcularTroco());
   }
 
-  // GETTERS
+  // GETTERS ================================
+
   get produtosFormArray(): FormArray<FormGroup> {
     return this.formVenda.get('produtos') as FormArray<FormGroup>;
   }
@@ -71,30 +73,32 @@ export class ModalVender {
     return this.formVenda.get('valorRecebido')?.value;
   }
 
-  // 🔥 Getter para o HTML acessar os itens selecionados
+  // Itens selecionados para exibir no subtotal
   get itensSelecionados() {
     return this.produtosFormArray.controls
       .filter((c) => c.value.selecionado)
       .map((c) => c.value);
   }
 
-  // 🔥 necessário para vincular form pelo ID
+  // Recupera um FormGroup pelo ID do produto
   getFormGroupById(id: number | undefined): FormGroup {
     return this.produtosFormArray.controls.find((c) => c.value.id === id)!;
   }
 
-  // 🔥 Atualiza a página visível
+  // PAGINAÇÃO ================================
+
   atualizarPaginacao() {
     this.totalPaginas = Math.ceil(this.produtosFiltrados.length / this.itensPorPagina);
-    if (this.paginaAtual > this.totalPaginas) this.paginaAtual = this.totalPaginas || 1;
+    if (this.paginaAtual > this.totalPaginas) {
+      this.paginaAtual = this.totalPaginas || 1;
+    }
 
-    const início = (this.paginaAtual - 1) * this.itensPorPagina;
-    const fim = início + this.itensPorPagina;
+    const inicio = (this.paginaAtual - 1) * this.itensPorPagina;
+    const fim = inicio + this.itensPorPagina;
 
-    this.paginaAtualProdutos = this.produtosFiltrados.slice(início, fim);
+    this.paginaAtualProdutos = this.produtosFiltrados.slice(inicio, fim);
   }
 
-  // Botões do paginador
   paginaAnterior() {
     if (this.paginaAtual > 1) {
       this.paginaAtual--;
@@ -109,10 +113,11 @@ export class ModalVender {
     }
   }
 
-  // TrackBy performance
   trackById(index: number, item: Produto) {
     return item.id;
   }
+
+  // CARREGAR PRODUTOS ================================
 
   carregarProdutos() {
     this.loading = true;
@@ -162,12 +167,15 @@ export class ModalVender {
     this.atualizarPaginacao();
   }
 
+  // CÁLCULOS ================================
+
   atualizarTotal() {
     this.total = this.produtosFormArray.controls
       .filter((c) => c.value.selecionado)
       .reduce((soma, c) => {
         const p = c.value;
-        return soma + (p.vendaPorPeso ? p.valorPeso || 0 : p.precoVenda * p.quantidadeVenda);
+        const subtotal = p.vendaPorPeso ? (p.valorPeso || 0) : p.precoVenda * p.quantidadeVenda;
+        return soma + subtotal;
       }, 0);
 
     this.lucro = this.calcularLucro();
@@ -196,8 +204,11 @@ export class ModalVender {
     const recebido = Number(this.valorRecebido || 0);
 
     this.troco = recebido - this.total;
+
     if (this.troco < 0) this.troco = 0;
   }
+
+  // FINALIZAR VENDA ================================
 
   finalizarVenda() {
     const selecionados = this.produtosFormArray.controls
@@ -233,7 +244,7 @@ export class ModalVender {
       this.precisaTroco &&
       this.valorRecebido < this.total
     ) {
-      this.notificacaoService.emitirErro('O valor recebido é menor que o total!');
+      this.notificacaoService.emitirErro('O valor recebido é menor que o total!')
       return;
     }
     */
@@ -241,7 +252,9 @@ export class ModalVender {
     this.loading = true;
 
     const requests = selecionados.map((p) => {
-      const precoUnitario = p.vendaPorPeso ? p.valorPeso / p.quantidadeVenda : p.precoVenda;
+      const precoUnitario = p.vendaPorPeso
+        ? p.valorPeso / p.quantidadeVenda
+        : p.precoVenda;
 
       const venda: Venda = {
         dataVenda: new Date().toISOString().split('T')[0],
@@ -265,6 +278,7 @@ export class ModalVender {
         this.carregarVendas();
         this.atualizarTotal();
 
+        // Resetar formulário
         this.produtosFormArray.controls.forEach((c) =>
           c.patchValue({
             selecionado: false,
@@ -283,7 +297,10 @@ export class ModalVender {
         this.lucro = 0;
       },
 
-      error: () => this.notificacaoService.emitirErro('Venda não foi realizada!'),
+      error: () => {
+        this.notificacaoService.emitirErro('Venda não foi realizada!');
+      },
+
       complete: () => (this.loading = false),
     });
   }
