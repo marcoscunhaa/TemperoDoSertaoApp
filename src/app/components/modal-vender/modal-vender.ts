@@ -16,7 +16,7 @@ import { forkJoin } from 'rxjs';
 export class ModalVender {
   produtos: Produto[] = [];
   produtosFiltrados: Produto[] = [];
-  
+
   // 🔥 paginação
   paginaAtual = 1;
   itensPorPagina = 5;
@@ -220,7 +220,7 @@ export class ModalVender {
     const insuficiente = selecionados.find(
       (p) => p.vendaPorPeso && p.valorPeso < p.precoVenda * p.quantidadeVenda
     );
-
+/*
     if (insuficiente) {
       this.notificacaoService.emitirErro(
         `O valor informado para "${insuficiente.detalhe}" é menor que o mínimo permitido!`
@@ -236,6 +236,7 @@ export class ModalVender {
       this.notificacaoService.emitirErro('O valor recebido é menor que o total!');
       return;
     }
+    */
 
     this.loading = true;
 
