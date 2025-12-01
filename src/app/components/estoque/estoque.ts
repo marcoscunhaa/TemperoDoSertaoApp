@@ -66,6 +66,7 @@ export class Estoque implements OnInit {
 
   filtrar() {
     const termo = this.termoPesquisa.toLowerCase();
+
     this.produtosFiltrados = this.produtos.filter((prod) => {
       const categoriaOk =
         this.categoriaSelecionada === 'todas' ||
@@ -78,6 +79,9 @@ export class Estoque implements OnInit {
 
       return categoriaOk && pesquisaOk;
     });
+
+    // 🔥 Sempre voltar à primeira página após filtrar
+    this.paginaAtual = 1;
 
     this.atualizarPaginacao();
   }
@@ -129,16 +133,15 @@ export class Estoque implements OnInit {
     });
   }
 
-  // ---------------- PAGINAÇÃO ----------------
+  // ---------------- PAGINAÇÃO AJUSTADA ----------------
 
   atualizarPaginacao() {
-    this.totalPaginas = Math.ceil(this.produtosFiltrados.length / this.itensPorPagina);
+    this.totalPaginas = Math.max(1, Math.ceil(this.produtosFiltrados.length / this.itensPorPagina));
+
     this.paginas = Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
 
-    // Garante que a página atual não passe do total
-    if (this.paginaAtual > this.totalPaginas) {
-      this.paginaAtual = this.totalPaginas;
-    }
+    // 🔥 Corrige limites do paginador
+    if (this.paginaAtual > this.totalPaginas) this.paginaAtual = this.totalPaginas;
     if (this.paginaAtual < 1) this.paginaAtual = 1;
   }
 
@@ -149,7 +152,8 @@ export class Estoque implements OnInit {
 
   produtosNaPagina(): Produto[] {
     const inicio = (this.paginaAtual - 1) * this.itensPorPagina;
-    return this.produtosFiltrados.slice(inicio, inicio + this.itensPorPagina);
+    const fim = inicio + this.itensPorPagina;
+    return this.produtosFiltrados.slice(inicio, fim);
   }
 
   trackByIndex(index: number) {

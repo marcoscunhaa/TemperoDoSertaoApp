@@ -13,6 +13,7 @@ export interface Venda {
   precoVenda: number;
   quantidadeVendida: number;
   formaPagamento: string;
+  lucro?: number;
 }
 
 export interface ResumoVendasDTO {

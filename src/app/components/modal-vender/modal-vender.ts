@@ -17,8 +17,6 @@ export class ModalVender {
   produtos: Produto[] = [];
   produtosFiltrados: Produto[] = [];
 
-  // 🔥 paginação
-  // Paginação
   paginaAtual = 1;
   itensPorPagina = 5;
   paginaAtualProdutos: Produto[] = [];
@@ -55,8 +53,7 @@ export class ModalVender {
     this.formVenda.get('formaPagamento')?.valueChanges.subscribe(() => this.calcularTroco());
   }
 
-  // GETTERS ================================
-
+  // GETTERS
   get produtosFormArray(): FormArray<FormGroup> {
     return this.formVenda.get('produtos') as FormArray<FormGroup>;
   }
@@ -73,62 +70,38 @@ export class ModalVender {
     return this.formVenda.get('valorRecebido')?.value;
   }
 
-  // Itens selecionados para exibir no subtotal
   get itensSelecionados() {
-    return this.produtosFormArray.controls
-      .filter((c) => c.value.selecionado)
-      .map((c) => c.value);
+    return this.produtosFormArray.controls.filter(c => c.value.selecionado).map(c => c.value);
   }
 
-  // Recupera um FormGroup pelo ID do produto
   getFormGroupById(id: number | undefined): FormGroup {
-    return this.produtosFormArray.controls.find((c) => c.value.id === id)!;
+    return this.produtosFormArray.controls.find(c => c.value.id === id)!;
   }
 
-  // PAGINAÇÃO ================================
-
+  // PAGINAÇÃO
   atualizarPaginacao() {
     this.totalPaginas = Math.ceil(this.produtosFiltrados.length / this.itensPorPagina);
-    if (this.paginaAtual > this.totalPaginas) {
-      this.paginaAtual = this.totalPaginas || 1;
-    }
+    if (this.paginaAtual > this.totalPaginas) this.paginaAtual = this.totalPaginas || 1;
 
     const inicio = (this.paginaAtual - 1) * this.itensPorPagina;
     const fim = inicio + this.itensPorPagina;
-
     this.paginaAtualProdutos = this.produtosFiltrados.slice(inicio, fim);
   }
 
-  paginaAnterior() {
-    if (this.paginaAtual > 1) {
-      this.paginaAtual--;
-      this.atualizarPaginacao();
-    }
-  }
+  paginaAnterior() { if (this.paginaAtual > 1) { this.paginaAtual--; this.atualizarPaginacao(); } }
+  proximaPagina() { if (this.paginaAtual < this.totalPaginas) { this.paginaAtual++; this.atualizarPaginacao(); } }
+  trackById(index: number, item: Produto) { return item.id; }
 
-  proximaPagina() {
-    if (this.paginaAtual < this.totalPaginas) {
-      this.paginaAtual++;
-      this.atualizarPaginacao();
-    }
-  }
-
-  trackById(index: number, item: Produto) {
-    return item.id;
-  }
-
-  // CARREGAR PRODUTOS ================================
-
+  // CARREGAR PRODUTOS
   carregarProdutos() {
     this.loading = true;
-
     this.produtoService.listarTodos().subscribe({
-      next: (lista: Produto[]) => {
+      next: lista => {
         this.produtos = lista;
         this.produtosFiltrados = [...lista];
         this.produtosFormArray.clear();
 
-        lista.forEach((p) => {
+        lista.forEach(p => {
           this.produtosFormArray.push(
             this.fb.group({
               id: [p.id],
@@ -141,6 +114,7 @@ export class ModalVender {
               selecionado: [false],
               vendaPorPeso: [false],
               valorPeso: [0],
+              peso: [0],
               quantidadeVenda: [1, [Validators.required, Validators.min(1)]],
             })
           );
@@ -149,32 +123,26 @@ export class ModalVender {
         this.atualizarPaginacao();
         this.loading = false;
       },
-
-      error: () => (this.loading = false),
+      error: () => this.loading = false
     });
   }
 
   filtrar(event: any) {
     const termo = event.target.value.toLowerCase().trim();
-
     this.produtosFiltrados = this.produtos.filter(
-      (p) =>
-        p.detalhe.toLowerCase().includes(termo) ||
-        p.marca.toLowerCase().includes(termo)
+      p => p.detalhe.toLowerCase().includes(termo) || p.marca.toLowerCase().includes(termo)
     );
-
     this.paginaAtual = 1;
     this.atualizarPaginacao();
   }
 
-  // CÁLCULOS ================================
-
+  // CÁLCULOS
   atualizarTotal() {
     this.total = this.produtosFormArray.controls
-      .filter((c) => c.value.selecionado)
+      .filter(c => c.value.selecionado)
       .reduce((soma, c) => {
         const p = c.value;
-        const subtotal = p.vendaPorPeso ? (p.valorPeso || 0) : p.precoVenda * p.quantidadeVenda;
+        const subtotal = p.vendaPorPeso ? p.valorPeso || 0 : p.precoVenda * p.quantidadeVenda;
         return soma + subtotal;
       }, 0);
 
@@ -184,15 +152,19 @@ export class ModalVender {
 
   calcularLucro(): number {
     return this.produtosFormArray.controls
-      .filter((c) => c.value.selecionado)
-      .reduce((lucro, c) => {
-        const p = c.value;
+      .filter(c => c.value.selecionado)
+      .reduce((lucro, c) => lucro + this.calcularLucroItem(c.value), 0);
+  }
 
-        const totalVenda = p.vendaPorPeso ? p.valorPeso : p.precoVenda * p.quantidadeVenda;
-        const totalCompra = p.precoCompra * p.quantidadeVenda;
-
-        return lucro + (totalVenda - totalCompra);
-      }, 0);
+  calcularLucroItem(p: any): number {
+    if (p.vendaPorPeso) {
+      const pesoTotal = p.peso * p.quantidadeVenda;
+      const valorTotal = p.valorPeso || 0;
+      const custoTotal = p.precoCompra * pesoTotal;
+      return valorTotal - custoTotal;
+    } else {
+      return p.precoVenda * p.quantidadeVenda - p.precoCompra * p.quantidadeVenda;
+    }
   }
 
   calcularTroco() {
@@ -200,61 +172,31 @@ export class ModalVender {
       this.troco = 0;
       return;
     }
-
     const recebido = Number(this.valorRecebido || 0);
-
-    this.troco = recebido - this.total;
-
-    if (this.troco < 0) this.troco = 0;
+    this.troco = Math.max(recebido - this.total, 0);
   }
 
-  // FINALIZAR VENDA ================================
-
+  // FINALIZAR VENDA
   finalizarVenda() {
-    const selecionados = this.produtosFormArray.controls
-      .filter((c) => c.value.selecionado)
-      .map((c) => c.value);
+    const selecionados = this.itensSelecionados;
 
-    if (selecionados.length === 0) {
+    if (!selecionados.length) {
       this.notificacaoService.emitirAviso('Selecione ao menos um produto.');
       return;
     }
 
-    const semEstoque = selecionados.find((p) => p.quantidadeEstoque === 0);
+    const semEstoque = selecionados.find(p => p.quantidadeEstoque === 0);
     if (semEstoque) {
-      this.notificacaoService.emitirErro(
-        `O produto "${semEstoque.detalhe}" está sem estoque!`
-      );
+      this.notificacaoService.emitirErro(`O produto "${semEstoque.detalhe}" está sem estoque!`);
       return;
     }
-
-    const insuficiente = selecionados.find(
-      (p) => p.vendaPorPeso && p.valorPeso < p.precoVenda * p.quantidadeVenda
-    );
-/*
-    if (insuficiente) {
-      this.notificacaoService.emitirErro(
-        `O valor informado para "${insuficiente.detalhe}" é menor que o mínimo permitido!`
-      );
-      return;
-    }
-
-    if (
-      this.formaPagamento === 'dinheiro' &&
-      this.precisaTroco &&
-      this.valorRecebido < this.total
-    ) {
-      this.notificacaoService.emitirErro('O valor recebido é menor que o total!')
-      return;
-    }
-    */
 
     this.loading = true;
 
-    const requests = selecionados.map((p) => {
-      const precoUnitario = p.vendaPorPeso
-        ? p.valorPeso / p.quantidadeVenda
-        : p.precoVenda;
+    const requests = selecionados.map(p => {
+      // Calcula lucro e valor de venda já considerando peso/unidade
+      const valorVenda = p.vendaPorPeso ? p.valorPeso || 0 : p.precoVenda;
+      const lucroItem = this.calcularLucroItem(p);
 
       const venda: Venda = {
         dataVenda: new Date().toISOString().split('T')[0],
@@ -262,9 +204,10 @@ export class ModalVender {
         produto: p.detalhe,
         marca: p.marca,
         precoCompra: p.precoCompra,
-        precoVenda: precoUnitario,
-        formaPagamento: this.formaPagamento,
+        precoVenda: valorVenda,
         quantidadeVendida: p.quantidadeVenda,
+        formaPagamento: this.formaPagamento,
+        lucro: lucroItem,
       };
 
       return this.vendaService.criarVenda(venda);
@@ -273,18 +216,18 @@ export class ModalVender {
     forkJoin(requests).subscribe({
       next: () => {
         this.notificacaoService.emitirSucesso('Venda registrada com sucesso!');
-
         this.carregarProdutos();
         this.carregarVendas();
         this.atualizarTotal();
 
-        // Resetar formulário
-        this.produtosFormArray.controls.forEach((c) =>
+        // Reseta formulário
+        this.produtosFormArray.controls.forEach(c =>
           c.patchValue({
             selecionado: false,
             quantidadeVenda: 1,
             vendaPorPeso: false,
             valorPeso: 0,
+            peso: 0,
           })
         );
 
@@ -296,19 +239,20 @@ export class ModalVender {
         this.troco = 0;
         this.lucro = 0;
       },
-
-      error: () => {
-        this.notificacaoService.emitirErro('Venda não foi realizada!');
-      },
-
-      complete: () => (this.loading = false),
+      error: () => this.notificacaoService.emitirErro('Venda não foi realizada!'),
+      complete: () => this.loading = false,
     });
   }
 
   carregarVendas() {
     this.vendaService.listarVendas().subscribe({
-      next: (lista) => (this.vendas = lista),
-      error: (err) => console.error(err),
+      next: lista => this.vendas = lista,
+      error: err => console.error(err),
     });
+  }
+
+  // FORMATAÇÃO DE MOEDA
+  formatarMoeda(valor: number): string {
+    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   }
 }
