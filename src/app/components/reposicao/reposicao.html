@@ -1,0 +1,264 @@
+<!-- Modal Adicionar/Editar Reposição -->
+<div class="modal fade" id="modalEditarReposicao" tabindex="-1" aria-labelledby="modalEditarReposicaoLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 shadow-lg border-0">
+
+      <!-- Cabeçalho -->
+      <div class="modal-header bg-warning text-white rounded-top-4">
+        <h5 class="modal-title fw-bold" id="modalEditarReposicaoLabel">
+          <i class="bi bi-pencil-square me-2"></i>{{ reposicaoSelecionada.id ? 'Editar' : 'Nova' }} Reposição
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- Corpo -->
+      <div class="modal-body">
+        <form #formReposicao="ngForm">
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Produto</label>
+
+            <!-- Select filtrado -->
+            <select class="form-select" [(ngModel)]="reposicaoSelecionada.produto" name="produto"
+              [disabled]="reposicaoSelecionada.id !=null">
+              <option *ngFor="let prod of produtosFiltrados" [ngValue]="prod">
+                {{ prod.detalhe }} - {{ prod.marca }}
+              </option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Quantidade</label>
+            <input type="number" class="form-control" [(ngModel)]="reposicaoSelecionada.quantidade" name="quantidade" />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Data de Chegada</label>
+            <input type="date" class="form-control" [(ngModel)]="reposicaoSelecionada.dataEntrada" name="dataEntrada" />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Vencimento</label>
+            <input type="date" class="form-control" [(ngModel)]="reposicaoSelecionada.vencimento" name="vencimento" />
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Rodapé -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-warning text-white" (click)="salvarReposicao()" data-bs-dismiss="modal">
+          <i class="bi bi-save me-1"></i> Salvar
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmação de exclusão de Reposição -->
+<div class="modal fade" id="confirmDeleteReposicaoModal" tabindex="-1"
+  aria-labelledby="confirmDeleteReposicaoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 shadow-lg border-0">
+
+      <!-- Cabeçalho -->
+      <div class="modal-header bg-danger text-white rounded-top-4">
+        <h5 class="modal-title fw-bold" id="confirmDeleteReposicaoModalLabel">
+          <i class="bi bi-exclamation-triangle me-2"></i>Confirmar exclusão
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Corpo -->
+      <div class="modal-body text-center">
+        Tem certeza que deseja excluir a reposição de
+        <strong>{{ reposicaoSelecionada.produto.detalhe }}</strong>?
+      </div>
+
+      <!-- Rodapé -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Não</button>
+        <button type="button" class="btn btn-danger" (click)="confirmarExcluirReposicao()"
+          data-bs-dismiss="modal">Sim</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- Header + Estoque -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3 class="m-0 fw-bold text-warning d-flex align-items-center">
+    <i class="bi bi-box-seam me-2"></i> Controle de Reposição
+  </h3>
+</div>
+
+<!-- Filtro Categoria / Mês / Ano dentro de barra amarela -->
+<div class="card-header bg-warning text-black d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+  <div class="d-flex gap-2 flex-wrap">
+
+    <!-- FILTRO POR CATEGORIA -->
+
+    <select class="form-select w-auto bg-light border-0 shadow-sm fw-semibold" [(ngModel)]="categoriaSelecionada"
+      (change)="filtrar()">
+      <option value="todas">Todas</option>
+      <option *ngFor="let cat of categorias" [value]="cat.value">{{ cat.label }}</option>
+    </select>
+
+
+    <!-- FILTRO POR MÊS -->
+
+    <select class="form-select w-auto bg-light border-0 shadow-sm fw-semibold" [(ngModel)]="mesSelecionado"
+      (change)="filtrar()">
+      <option value="todos">Todos Meses</option>
+      <option *ngFor="let m of meses" [ngValue]="m.valor">{{ m.nome }}</option>
+    </select>
+
+
+    <!-- FILTRO POR ANO -->
+
+    <select class="form-select w-auto bg-light border-0 shadow-sm fw-semibold" [(ngModel)]="anoSelecionado"
+      (change)="filtrar()">
+      <option value="todos">Todos Anos</option>
+      <option *ngFor="let ano of anos" [ngValue]="ano">{{ ano }}</option>
+    </select>
+
+
+  </div>
+
+  <!-- Ícone de Estoque à direita -->
+  <div class="ms-3 text-black fs-3">
+    <i class="bi bi-box-seam"></i>
+  </div>
+
+</div>
+
+
+
+<!-- Tabela -->
+<div class="card shadow-sm border-0 rounded-4 mb-4">
+  <div class="card-body p-0">
+
+    <div *ngIf="reposicoesFiltradas.length > 0; else semReposicoes">
+
+      <div class="table-responsive shadow-sm">
+        <table class="table table-hover align-middle mb-0">
+
+          <thead class="bg-primary text-white shadow-sm">
+            <tr class="fw-semibold small">
+              <th class="py-3 px-4">Categoria</th>
+              <th class="py-3 px-4">Produto</th>
+              <th class="py-3 px-4">Quantidade</th>
+              <th class="py-3 px-4">Data de Chegada</th>
+              <th class="py-3 px-4">Vencimento</th>
+              <th class="py-3 px-4 text-center">Ações</th>
+            </tr>
+          </thead>
+
+          <tbody class="table-group-divider">
+            @for (rep of reposicoesNaPagina(); track rep.id) {
+
+            <tr>
+              <td class="py-3 px-4 fw-bold text-dark">
+                <span class="badge border px-3 py-2" [ngClass]="{
+                    'bg-red-light text-red border-red': rep.produto.categoria === 'Carnes',
+                    'bg-yellow-light text-yellow border-yellow': rep.produto.categoria === 'Bebidas',
+                    'bg-green-light text-green border-green': rep.produto.categoria === 'Doces',
+                    'bg-blue-light text-blue border-blue': rep.produto.categoria === 'Frios',
+                    'bg-purple-light text-purple border-purple': rep.produto.categoria === 'Temperos'
+                  }">
+                  {{ rep.produto.categoria }}
+                </span>
+              </td>
+
+              <td class="py-3 px-4 fw-semibold text-dark">
+                {{ rep.produto.detalhe }}
+                <div class="small text-muted mt-1">{{ rep.produto.marca }}</div>
+              </td>
+
+              <td class="py-3 px-4">
+                <span class="badge rounded-pill px-3 py-2" [ngClass]="{
+                    'bg-danger-subtle text-danger': rep.quantidade < 5,
+                    'bg-warning-subtle text-warning': rep.quantidade >= 5 && rep.quantidade <= 10,
+                    'bg-success-subtle text-success': rep.quantidade > 10
+                  }">
+                  {{ rep.quantidade }} un
+                </span>
+              </td>
+              <td class="py-3 px-4 text-muted">{{ rep.dataEntrada | date:'dd/MM/yyyy' }}</td>
+              <td class="py-3 px-4 text-muted">{{ rep.vencimento | date:'dd/MM/yyyy' }}</td>
+
+              <td class="py-3 px-4 text-center">
+                <button class="btn btn-sm btn-outline-warning rounded-circle me-2" (click)="editarReposicao(rep)"
+                  data-bs-toggle="modal" data-bs-target="#modalEditarReposicao">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger rounded-circle" data-bs-toggle="modal"
+                  data-bs-target="#confirmDeleteReposicaoModal">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+
+            } @empty {
+
+            <tr>
+              <td colspan="6" class="text-center py-5 text-muted fs-6">
+                Nenhuma reposição encontrada
+              </td>
+            </tr>
+
+            }
+          </tbody>
+
+        </table>
+      </div>
+
+    </div>
+
+    <ng-template #semReposicoes>
+      <div class="text-center py-5 text-muted fw-semibold">
+        Nenhuma reposição encontrada
+      </div>
+    </ng-template>
+
+  </div>
+</div>
+
+<!-- Paginação elegante -->
+<nav aria-label="Navegação da Tabela" class="mb-4">
+  <ul class="pagination justify-content-center mb-0 gap-1">
+    <li class="page-item" [class.disabled]="paginaAtual === 1">
+      <button class="page-link rounded-circle px-3 py-2" (click)="irParaPagina(paginaAtual - 1)">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+    </li>
+
+    <li class="page-item" *ngFor="let pagina of paginas; trackBy: trackByIndex" [class.active]="paginaAtual === pagina">
+      <button class="page-link rounded-circle px-3 py-2" (click)="irParaPagina(pagina)"
+        [ngClass]="{'bg-primary text-white': paginaAtual===pagina,'text-primary': paginaAtual!==pagina}">
+        {{ pagina }}
+      </button>
+    </li>
+
+    <li class="page-item" [class.disabled]="paginaAtual === totalPaginas">
+      <button class="page-link rounded-circle px-3 py-2" (click)="irParaPagina(paginaAtual + 1)">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </li>
+  </ul>
+</nav>
+
+<!-- Botão Adicionar abaixo da tabela - mais elegante -->
+<div class="d-flex justify-content-end mb-4">
+  <button class="btn btn-warning shadow-sm d-flex align-items-center px-4 py-2 btn-zoom" data-bs-toggle="modal"
+    data-bs-target="#modalEditarReposicao" (click)="novaReposicao()">
+    <i class="bi bi-box-seam me-2 fs-5"></i>
+    <span class="fw-semibold">Reposição</span>
+  </button>
+</div>

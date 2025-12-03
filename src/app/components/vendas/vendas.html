@@ -18,12 +18,12 @@
 
           <div class="mb-3">
             <label class="fw-semibold">Produto</label>
-            <input type="text" class="form-control" [(ngModel)]="vendaSelecionada.produto" name="produto" />
+            <input [disabled]="vendaSelecionada.produto" type="text" class="form-control" [(ngModel)]="vendaSelecionada.produto" name="produto" />
           </div>
 
           <div class="mb-3">
             <label class="fw-semibold">Marca</label>
-            <input type="text" class="form-control" [(ngModel)]="vendaSelecionada.marca" name="marca" />
+            <input [disabled]="vendaSelecionada.produto" type="text" class="form-control" [(ngModel)]="vendaSelecionada.marca" name="marca" />
           </div>
 
           <div class="mb-3">
@@ -243,7 +243,17 @@
 
             <td class="fw-semibold">{{ venda.formaPagamento }}</td>
             <td>{{ formatarMoeda(venda.precoVenda) }}</td>
-            <td>{{ venda.quantidadeVendida }}</td>
+            <td class="py-3 px-4">
+                <span class="badge rounded-pill px-3 py-2"
+                  [ngClass]="{
+                    'bg-danger-subtle text-danger': venda.quantidadeVendida < 5,
+                    'bg-warning-subtle text-warning': venda.quantidadeVendida >= 5 && venda.quantidadeVendida <= 10,
+                    'bg-success-subtle text-success': venda.quantidadeVendida > 10
+                  }"
+                >
+                  {{ venda.quantidadeVendida }} un
+                </span>
+              </td>
             <td>{{ formatarMoeda(venda.lucro ?? 0) }}</td>
             <td class="py-3 px-4 text-muted">{{ venda.dataVenda | date:'dd/MM/yyyy' }}</td>
 

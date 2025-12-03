@@ -1,3 +1,5 @@
+import { ReposicaoComponent } from './../reposicao/reposicao';
+
 import { Component, HostListener } from '@angular/core';
 import { Footer } from '../footer/footer';
 import { Estoque } from '../estoque/estoque';
@@ -11,7 +13,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-home',
   templateUrl: './home.html',
   styleUrls: ['./home.scss'],
-  imports: [Footer, Estoque, ModalVender, ModalInserir, Vendas, CommonModule],
+  imports: [ReposicaoComponent, Footer, Estoque, ModalVender, ModalInserir, Vendas, CommonModule],
 })
 export class Home {
    mostrarBotaoTopo = false;

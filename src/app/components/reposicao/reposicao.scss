@@ -1,0 +1,71 @@
+/* Roxo */
+.text-purple {
+  color: #6f42c1 !important;
+}
+.bg-purple-light {
+  background-color: #f3e8ff !important;
+  border-color: #d3b8ff !important;
+}
+
+/* Azul */
+.text-blue {
+  color: #0d6efd !important;
+}
+.bg-blue-light {
+  background-color: #e6f0ff !important; /* azul pastel leve */
+  border-color: #b3d1ff !important;
+}
+
+/* Verde */
+.text-green {
+  color: #198754 !important;
+}
+.bg-green-light {
+  background-color: #e8fff1 !important; /* verde menta suave */
+  border-color: #b8f2d0 !important;
+}
+
+/* Vermelho */
+.text-red {
+  color: #dc3545 !important;
+}
+.bg-red-light {
+  background-color: #ffe8ea !important; /* rosa/vermelho pastel */
+  border-color: #ffb5bd !important;
+}
+
+/* Amarelo */
+.text-yellow {
+  color: #ffc107 !important;
+}
+.bg-yellow-light {
+  background-color: #fff8e1 !important; /* amarelo manteiga suave */
+  border-color: #ffe9a8 !important;
+}
+
+/* Cinza */
+.text-gray {
+  color: #6c757d !important;
+}
+.bg-gray-light {
+  background-color: #f1f3f5 !important; /* cinza claríssimo elegante */
+  border-color: #d6d9dc !important;
+}
+
+/* Laranja */
+.text-orange {
+  color: #fd7e14 !important;
+}
+.bg-orange-light {
+  background-color: #fff1e6 !important; /* laranja pastel */
+  border-color: #ffcfb3 !important;
+}
+
+.btn-zoom {
+    transition: transform 0.2s ease-in-out;
+}
+
+.btn-zoom:hover {
+    transform: scale(1.12);
+    box-shadow: 0 0 14px rgba(0, 0, 0, 0.25);
+}
