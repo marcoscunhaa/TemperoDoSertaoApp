@@ -3,7 +3,7 @@
   <!-- Card referente ao estoque -->
   <div class="card shadow-lg rounded-4 p-4">
     @defer(on idle){
-      <app-estoque />
+    <app-estoque />
     }
   </div>
 
@@ -12,14 +12,20 @@
   <app-modal-vender />
 
   <!-- Card referente as vendas -->
-   @defer(on idle){
-      <app-vendas />
-   }
+  @defer(on idle){
+  <app-vendas />
+  }
 
   <!-- footer -->
   @defer(on idle){
-    <app-footer />
+  <app-footer />
   }
 
-</div>
+  <!-- Botão flutuante voltar ao topo -->
+  <button class="btn btn-danger rounded-circle shadow-lg scroll-top-btn"
+    [ngClass]="{'d-none': !mostrarBotaoTopo, 'animate-pulse': mostrarBotaoTopo}" (click)="irParaTopo()"
+    title="Voltar ao topo">
+    <i class="bi bi-arrow-up fs-5"></i>
+  </button>
 
+</div>
