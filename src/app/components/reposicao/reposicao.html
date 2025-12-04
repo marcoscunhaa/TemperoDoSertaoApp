@@ -147,9 +147,9 @@
             <tr class="fw-semibold small">
               <th class="py-2 px-2">Categoria</th>
               <th class="py-2 px-2">Produto</th>
-              <th class="py-2 px-2">Quantidade</th>
               <th class="py-2 px-2">Aquisição(R$)</th>
               <th class="py-2 px-2">Venda(R$)</th>
+              <th class="py-2 px-2">Quantidade</th>
               <th class="py-2 px-2">Chegada do Lote</th>
               <th class="py-2 px-2">Vencimento do Lote</th>
               <th class="py-2 px-2 text-center">Ações</th>
@@ -175,7 +175,8 @@
                 {{ rep.produto.detalhe }}
                 <div class="small text-muted mt-1">{{ rep.produto.marca }}</div>
               </td>
-
+              <td class="py-2 px-2 text-danger">{{ rep.produto.precoCompra | currency:'BRL' }}</td>
+              <td class="py-2 px-2 text-success">{{ rep.produto.precoVenda | currency:'BRL' }}</td>
               <td class="py-2 px-2">
                 <span class="badge rounded-pill px-3 py-2" [ngClass]="{
                     'bg-danger-subtle text-danger': rep.quantidade < 5,
@@ -186,8 +187,7 @@
                 </span>
               </td>
 
-              <td class="py-2 px-2 text-danger">{{ rep.produto.precoCompra | currency:'BRL' }}</td>
-              <td class="py-2 px-2 text-success">{{ rep.produto.precoVenda | currency:'BRL' }}</td>
+
               <td class="py-2 px-2 text-muted">{{ rep.dataEntrada | date:'dd/MM/yyyy' }}</td>
               <td class="py-2 px-2 text-muted">{{ rep.vencimento | date:'dd/MM/yyyy' }}</td>
 
